@@ -15,8 +15,18 @@ import {
   styled,
   ButtonBase,
   Fade,
+  Box,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import { ArrowDownward, Keyboard, Mic, Settings } from "@mui/icons-material";
+import {
+  ArrowDownward,
+  Keyboard,
+  Mic,
+  Settings,
+  Close,
+} from "@mui/icons-material";
 import { keyframes, css } from "@mui/styled-engine-sc";
 import FlipkartGridPng from "../assets/images/flipkart_grid.png";
 
@@ -106,6 +116,7 @@ const Dictaphone = () => {
   const [messages, setMessages] = useState([]);
   const [drawerOpen, toggleDrawer] = useState(false);
   const [keyboardOpen, toggleKeyboard] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
     const loadSpeechRecognition = async () => {
@@ -132,6 +143,7 @@ const Dictaphone = () => {
       try {
         const body = new FormData();
         body.append("message", transcript);
+        body.append("language", language);
         let res = await fetch("http://13.92.117.36:8000/api/v1/", {
           method: "POST",
           body,
@@ -159,7 +171,7 @@ const Dictaphone = () => {
       resetTranscript();
       xyz();
     }
-  }, [listening, transcript, resetTranscript]);
+  }, [listening, transcript, resetTranscript, language]);
 
   const textInput = useRef(null);
   useEffect(() => {
@@ -182,6 +194,40 @@ const Dictaphone = () => {
 
   const bottomDiv = useRef(null);
 
+  const [textInputValue, setTextInputValue] = useState("");
+  const handleTextSubmit = async (e) => {
+    e.preventDefault();
+    toggleKeyboard(false);
+    if (textInputValue.length === 0) return;
+    setMessages((m) => [
+      ...m,
+      {
+        type: "user",
+        body: [textInputValue],
+      },
+    ]);
+    try {
+      const body = new FormData();
+      body.append("message", textInputValue);
+      body.append("language", "en-IN");
+      let res = await fetch("http://13.92.117.36:8000/api/v1/", {
+        method: "POST",
+        body,
+      });
+      res = await res.json();
+      setMessages((m) => [
+        ...m,
+        {
+          type: "bot",
+          body: res.bot_reply,
+        },
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
+    setTextInputValue("");
+  };
+
   if (loadingSpeechRecognition || !browserSupportsSpeechRecognition) {
     return null;
   }
@@ -201,7 +247,37 @@ const Dictaphone = () => {
         anchor="right"
         open={drawerOpen}
         onClose={() => toggleDrawer(false)}
-      />
+      >
+        <Box sx={{ width: 250 }}>
+          <Grid container sx={{ py: 1, px: 2, alignItems: "center" }}>
+            <Typography variant="h6" component="div" sx={{ flex: 1 }}>
+              Settings
+            </Typography>
+            <IconButton
+              color="inherit"
+              edge="end"
+              onClick={() => toggleDrawer(false)}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+          <Divider />
+          <Box sx={{ px: 2 }}>
+            <Typography variant="body1" component="p" sx={{ mt: 2, mb: 1 }}>
+              Language
+            </Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={language}
+              exclusive
+              onChange={(e, v) => setLanguage(v)}
+            >
+              <ToggleButton value="en">English</ToggleButton>
+              <ToggleButton value="hi">Hindi</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        </Box>
+      </Drawer>
       <AppBar position="static" sx={{ bgcolor: "rgb(152,176,230)" }}>
         <Grid container sx={{ alignItems: "center", p: 1 }}>
           <Grid item xs>
@@ -250,13 +326,22 @@ const Dictaphone = () => {
         {transcript && <Message type="user" line={transcript} />}
         <div ref={bottomDiv} />
       </Container>
+      <Divider />
       <Grid container sx={{ alignItems: "flex-end", p: 1 }}>
         <Grid item xs={!keyboardOpen} sx={keyboardOpen ? { flex: 1 } : {}}>
-          <Grid container sx={{ justifyContent: "flex-start" }}>
+          <Grid
+            container
+            component="form"
+            noValidate
+            onSubmit={handleTextSubmit}
+            sx={{ justifyContent: "flex-start" }}
+          >
             {keyboardOpen ? (
               <InputBase
                 inputRef={textInput}
                 placeholder="Type a message"
+                value={textInputValue}
+                onChange={(e) => setTextInputValue(e.target.value)}
                 sx={{
                   flex: 1,
                   bgcolor: "common.white",
@@ -266,7 +351,11 @@ const Dictaphone = () => {
                 }}
               />
             ) : (
-              <IconButton color="inherit" onClick={() => toggleKeyboard(true)}>
+              <IconButton
+                color="inherit"
+                type="button"
+                onClick={() => toggleKeyboard(true)}
+              >
                 <Keyboard />
               </IconButton>
             )}
@@ -282,7 +371,7 @@ const Dictaphone = () => {
                   SpeechRecognition.abortListening();
                 } else {
                   SpeechRecognition.startListening({
-                    language: "en-US",
+                    language: `${language}-IN`,
                   });
                 }
               }}
