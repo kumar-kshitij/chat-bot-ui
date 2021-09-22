@@ -30,7 +30,7 @@ import {
 import { keyframes, css } from "@mui/styled-engine-sc";
 import FlipkartGridPng from "../assets/images/flipkart_grid.png";
 
-const SUBSCRIPTION_KEY = process.env.REACT_APP_AZURE_SPEECH_KEY;
+const SUBSCRIPTION_KEY = "1d09a80fd5bf4c45aff35bd30a8f70f8";
 const REGION = "centralindia";
 const TOKEN_ENDPOINT = `https://${REGION}.api.cognitive.microsoft.com/sts/v1.0/issuetoken`;
 
