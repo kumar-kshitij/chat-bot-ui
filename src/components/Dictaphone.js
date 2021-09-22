@@ -10,16 +10,47 @@ import {
   Grid,
   IconButton,
   Paper,
-  Toolbar,
   Typography,
   InputBase,
+  styled,
   ButtonBase,
 } from "@mui/material";
-import { Mic, Settings } from "@mui/icons-material";
+import { ArrowDownward, Keyboard, Mic, Settings } from "@mui/icons-material";
+import { keyframes, css } from "@mui/styled-engine-sc";
+import FlipkartGridPng from "../assets/images/flipkart_grid.png";
 
 const SUBSCRIPTION_KEY = process.env.REACT_APP_AZURE_SPEECH_KEY;
 const REGION = "centralindia";
 const TOKEN_ENDPOINT = `https://${REGION}.api.cognitive.microsoft.com/sts/v1.0/issuetoken`;
+
+const pulse = keyframes`
+  0% {
+    box-shadow: 0 0 0 15px rgba(0,0,0,0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(0,0,0,0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 15px rgba(0,0,0,0.3);
+  }
+`;
+
+const StyledIconButton = styled(ButtonBase)(
+  ({ theme }) => css`
+    color: ${(props) =>
+      props.listening ? theme.palette.common.white : "inherit"};
+    background-color: ${(props) =>
+      props.listening ? theme.palette.error.main : "transparent"};
+    animation: ${(props) =>
+      props.listening
+        ? css`
+            ${pulse} 0.75s 0.5s infinite
+          `
+        : "none"};
+    padding: 8px;
+    border-radius: 50%;
+  `
+);
 
 const Dictaphone = () => {
   const [loadingSpeechRecognition, setLoadingSpeechRecognition] =
@@ -33,6 +64,7 @@ const Dictaphone = () => {
 
   const [messages, setMessages] = useState([]);
   const [drawerOpen, toggleDrawer] = useState(false);
+  const [keyboardOpen, toggleKeyboard] = useState(false);
 
   useEffect(() => {
     const loadSpeechRecognition = async () => {
@@ -110,24 +142,32 @@ const Dictaphone = () => {
         onClose={() => toggleDrawer(false)}
       />
       <AppBar position="static" sx={{ bgcolor: "rgb(152,176,230)" }}>
-        <Toolbar>
-          <img src="flipkart_grid.png" alt="" style={{ width: "150px" }} />
-          <Typography
-            variant="h6"
-            component="div"
-            align="center"
-            sx={{ flex: 1, fontFamily: "Good Times", color: "rgb(67,87,114)" }}
-          >
-            SARA
-          </Typography>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={() => toggleDrawer(true)}
-          >
-            <Settings />
-          </IconButton>
-        </Toolbar>
+        <Grid container sx={{ alignItems: "center", p: 1 }}>
+          <Grid item xs>
+            <Grid container sx={{ justifyContent: "flex-start" }}>
+              <img src={FlipkartGridPng} alt="" style={{ maxHeight: "42px" }} />
+            </Grid>
+          </Grid>
+          <Grid item xs>
+            <Grid container sx={{ justifyContent: "center" }}>
+              <Typography
+                variant="h6"
+                component="div"
+                align="center"
+                sx={{ fontFamily: "Good Times", color: "rgb(67,87,114)" }}
+              >
+                SARA
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid item xs>
+            <Grid container sx={{ justifyContent: "flex-end" }}>
+              <IconButton color="inherit" onClick={() => toggleDrawer(true)}>
+                <Settings />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </Grid>
       </AppBar>
       <Container
         sx={{
@@ -202,39 +242,54 @@ const Dictaphone = () => {
         )}
       </Container>
       <Grid container sx={{ alignItems: "flex-end", p: 1 }}>
-        <InputBase
-          placeholder="Type a message"
-          multiline
-          sx={{
-            flex: 1,
-            bgcolor: "common.white",
-            borderRadius: 5,
-            px: 2,
-            py: 1,
-            mr: 1,
-          }}
-        />
-        <Grid item>
-          <ButtonBase
-            onClick={
-              listening
-                ? SpeechRecognition.abortListening
-                : () =>
-                    SpeechRecognition.startListening({
-                      language: "en-US",
-                    })
-            }
-            sx={{
-              borderRadius: 6,
-              bgcolor: listening ? "error.main" : "rgb(152,176,230)",
-              color: "common.white",
-              height: "48px",
-              width: "48px",
-            }}
-          >
-            <Mic />
-          </ButtonBase>
+        <Grid item xs={!keyboardOpen} sx={keyboardOpen ? { flex: 1 } : {}}>
+          <Grid container sx={{ justifyContent: "flex-start" }}>
+            {keyboardOpen ? (
+              <InputBase
+                placeholder="Type a message"
+                sx={{
+                  flex: 1,
+                  bgcolor: "common.white",
+                  px: 2,
+                  py: 1,
+                  mr: 1,
+                }}
+              />
+            ) : (
+              <IconButton color="inherit" onClick={() => toggleKeyboard(true)}>
+                <Keyboard />
+              </IconButton>
+            )}
+          </Grid>
         </Grid>
+        <Grid item xs={!keyboardOpen}>
+          <Grid container sx={{ justifyContent: "center" }}>
+            <StyledIconButton
+              listening={listening ? 1 : 0}
+              onClick={() => {
+                toggleKeyboard(false);
+                if (listening) {
+                  SpeechRecognition.abortListening();
+                } else {
+                  SpeechRecognition.startListening({
+                    language: "en-US",
+                  });
+                }
+              }}
+            >
+              <Mic />
+            </StyledIconButton>
+          </Grid>
+        </Grid>
+        {!keyboardOpen && (
+          <Grid item xs>
+            <Grid container sx={{ justifyContent: "flex-end" }}>
+              <IconButton color="inherit" onClick={() => {}}>
+                <ArrowDownward />
+              </IconButton>
+            </Grid>
+          </Grid>
+        )}
       </Grid>
     </Container>
   );
