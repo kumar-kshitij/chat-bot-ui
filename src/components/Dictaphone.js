@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -14,6 +14,7 @@ import {
   InputBase,
   styled,
   ButtonBase,
+  Fade,
 } from "@mui/material";
 import { ArrowDownward, Keyboard, Mic, Settings } from "@mui/icons-material";
 import { keyframes, css } from "@mui/styled-engine-sc";
@@ -51,6 +52,46 @@ const StyledIconButton = styled(ButtonBase)(
     border-radius: 50%;
   `
 );
+
+const Message = ({ type, line }) => {
+  const x = useRef(null);
+  useEffect(() => {
+    if (x && x.current) {
+      x.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
+  return (
+    <Grid
+      ref={x}
+      container
+      direction={type === "user" ? "row-reverse" : "row"}
+      sx={{
+        my: 1,
+      }}
+    >
+      <Grid item xs={10} sm={9} md={8}>
+        <Grid container direction={type === "user" ? "row-reverse" : "row"}>
+          <Grid item>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 1,
+                typography: "body2",
+                bgcolor:
+                  type === "user" ? "rgb(205,215,239)" : "rgb(228,229,231)",
+                display: "inline-block",
+                color: "rgb(60,64,73)",
+              }}
+            >
+              {line}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+};
 
 const Dictaphone = () => {
   const [loadingSpeechRecognition, setLoadingSpeechRecognition] =
@@ -118,7 +159,28 @@ const Dictaphone = () => {
       resetTranscript();
       xyz();
     }
-  }, [listening]);
+  }, [listening, transcript, resetTranscript]);
+
+  const textInput = useRef(null);
+  useEffect(() => {
+    if (keyboardOpen && textInput && textInput.current) {
+      textInput.current.focus();
+    }
+  }, [keyboardOpen]);
+
+  const [showScrollBtn, toggleScrollBtn] = useState(false);
+  const handleScroll = (e) => {
+    const notBottom =
+      e.target.scrollHeight - e.target.scrollTop > e.target.clientHeight + 10;
+    if (notBottom && !showScrollBtn) {
+      toggleScrollBtn(true);
+    }
+    if (!notBottom && showScrollBtn) {
+      toggleScrollBtn(false);
+    }
+  };
+
+  const bottomDiv = useRef(null);
 
   if (loadingSpeechRecognition || !browserSupportsSpeechRecognition) {
     return null;
@@ -133,7 +195,6 @@ const Dictaphone = () => {
         display: "flex",
         flexDirection: "column",
         border: "1px solid rgb(148,168,219)",
-        // bgcolor: "grey.200",
       }}
     >
       <Drawer
@@ -175,77 +236,26 @@ const Dictaphone = () => {
           overflowY: "auto",
           py: 2,
         }}
+        onScroll={handleScroll}
       >
         {messages.map((message, k1) =>
           message.body.map((line, k2) => (
-            <Grid
+            <Message
               key={k1.toString() + "_" + k2.toString()}
-              container
-              direction={message.type === "user" ? "row-reverse" : "row"}
-              sx={{
-                my: 1,
-              }}
-            >
-              <Grid item xs={10} sm={9} md={8}>
-                <Grid
-                  container
-                  direction={message.type === "user" ? "row-reverse" : "row"}
-                >
-                  <Grid item>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 1,
-                        typography: "body2",
-                        bgcolor:
-                          message.type === "user"
-                            ? "rgb(205,215,239)"
-                            : "rgb(228,229,231)",
-                        display: "inline-block",
-                        color: "rgb(60,64,73)",
-                      }}
-                    >
-                      {line}
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
+              type={message.type}
+              line={line}
+            />
           ))
         )}
-        {transcript && (
-          <Grid
-            container
-            direction="row-reverse"
-            sx={{
-              my: 1,
-            }}
-          >
-            <Grid item xs={10} sm={9} md={8}>
-              <Grid container direction="row-reverse">
-                <Grid item>
-                  <Paper
-                    sx={{
-                      p: 1,
-                      typography: "body2",
-                      bgcolor: "rgb(205,215,239)",
-                      display: "inline-block",
-                      color: "rgb(60,64,73)",
-                    }}
-                  >
-                    {transcript}
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        )}
+        {transcript && <Message type="user" line={transcript} />}
+        <div ref={bottomDiv} />
       </Container>
       <Grid container sx={{ alignItems: "flex-end", p: 1 }}>
         <Grid item xs={!keyboardOpen} sx={keyboardOpen ? { flex: 1 } : {}}>
           <Grid container sx={{ justifyContent: "flex-start" }}>
             {keyboardOpen ? (
               <InputBase
+                inputRef={textInput}
                 placeholder="Type a message"
                 sx={{
                   flex: 1,
@@ -284,9 +294,18 @@ const Dictaphone = () => {
         {!keyboardOpen && (
           <Grid item xs>
             <Grid container sx={{ justifyContent: "flex-end" }}>
-              <IconButton color="inherit" onClick={() => {}}>
-                <ArrowDownward />
-              </IconButton>
+              <Fade in={showScrollBtn}>
+                <IconButton
+                  color="inherit"
+                  onClick={() => {
+                    if (bottomDiv && bottomDiv.current) {
+                      bottomDiv.current.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  <ArrowDownward />
+                </IconButton>
+              </Fade>
             </Grid>
           </Grid>
         )}
