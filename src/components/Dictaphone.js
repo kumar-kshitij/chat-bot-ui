@@ -144,10 +144,13 @@ const Dictaphone = () => {
         const body = new FormData();
         body.append("message", transcript);
         body.append("language", language);
-        let res = await fetch("http://13.92.117.36:8000/api/v1/", {
-          method: "POST",
-          body,
-        });
+        let res = await fetch(
+          "https://simpledjango.azurewebsites.net/api/v1/",
+          {
+            method: "POST",
+            body,
+          }
+        );
         res = await res.json();
         setMessages((m) => [
           ...m,
@@ -210,7 +213,7 @@ const Dictaphone = () => {
       const body = new FormData();
       body.append("message", textInputValue);
       body.append("language", "en-IN");
-      let res = await fetch("http://13.92.117.36:8000/api/v1/", {
+      let res = await fetch("https://simpledjango.azurewebsites.net/api/v1/", {
         method: "POST",
         body,
       });
