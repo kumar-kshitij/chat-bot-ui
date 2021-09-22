@@ -69,7 +69,10 @@ const Message = ({ type, line }) => {
     if (x && x.current) {
       x.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+    if (type !== "user" && "speechSynthesis" in window) {
+      speechSynthesis.speak(new SpeechSynthesisUtterance(line));
+    }
+  }, [type, line]);
 
   return (
     <Grid
@@ -357,7 +360,13 @@ const Dictaphone = () => {
               <IconButton
                 color="inherit"
                 type="button"
-                onClick={() => toggleKeyboard(true)}
+                onClick={() => {
+                  if ("speechSynthesis" in window) {
+                    speechSynthesis.cancel();
+                  }
+                  SpeechRecognition.abortListening();
+                  toggleKeyboard(true);
+                }}
               >
                 <Keyboard />
               </IconButton>
@@ -369,10 +378,13 @@ const Dictaphone = () => {
             <StyledIconButton
               listening={listening ? 1 : 0}
               onClick={() => {
-                toggleKeyboard(false);
                 if (listening) {
                   SpeechRecognition.abortListening();
                 } else {
+                  if ("speechSynthesis" in window) {
+                    speechSynthesis.cancel();
+                  }
+                  toggleKeyboard(false);
                   SpeechRecognition.startListening({
                     language: `${language}-IN`,
                   });
