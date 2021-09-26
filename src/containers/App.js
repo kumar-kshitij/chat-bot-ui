@@ -1,8 +1,7 @@
 import React from "react";
-import { CssBaseline } from "@mui/material";
-import Dictaphone from "../components/Dictaphone";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { CssBaseline, createTheme, ThemeProvider } from "@mui/material";
 import GoodTimesTtf from "../assets/fonts/good-times.rg-regular.ttf";
+import HomePage from "./HomePage";
 
 const theme = createTheme({
   typography: {
@@ -27,7 +26,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Dictaphone />
+      <HomePage />
     </ThemeProvider>
   );
 };
