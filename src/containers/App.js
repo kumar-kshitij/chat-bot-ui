@@ -1,5 +1,4 @@
-import React from "react";
-import { CssBaseline, createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import GoodTimesTtf from "../assets/fonts/good-times.rg-regular.ttf";
 import HomePage from "./HomePage";
 

@@ -1,7 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
+import { ArrowDownward, Keyboard, Settings } from "@mui/icons-material";
 import {
   AppBar,
   Backdrop,
@@ -14,12 +11,15 @@ import {
   InputBase,
   Typography,
 } from "@mui/material";
-import { ArrowDownward, Keyboard, Settings } from "@mui/icons-material";
+import { useCallback, useEffect, useRef, useState } from "react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
-import SettingsDrawer from "../components/SettingsDrawer";
 import FlipkartGridPng from "../assets/images/flipkart_grid.png";
 import Message from "../components/Message";
 import MicButton from "../components/MicButton";
+import SettingsDrawer from "../components/SettingsDrawer";
 
 const REGION = "centralindia";
 const TOKEN_ENDPOINT = `https://${REGION}.api.cognitive.microsoft.com/sts/v1.0/issuetoken`;

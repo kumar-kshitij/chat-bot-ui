@@ -1,4 +1,4 @@
-import React from "react";
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -9,7 +9,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
 
 const SettingsDrawer = ({ open, onClose, language, onLanguageChange }) => {
   return (

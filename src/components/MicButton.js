@@ -1,7 +1,6 @@
-import React from "react";
 import { Mic } from "@mui/icons-material";
 import { ButtonBase, styled } from "@mui/material";
-import { keyframes, css } from "@mui/styled-engine-sc";
+import { css, keyframes } from "@mui/styled-engine-sc";
 
 const pulse = keyframes`
   0% {
