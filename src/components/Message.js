@@ -10,14 +10,19 @@ const Message = ({ sender, lang, text, ponyfill, voices }) => {
     }
     if (sender !== "user" && ponyfill) {
       const utterance = new ponyfill.SpeechSynthesisUtterance(text);
-      const voice = voices.find(
-        (v) =>
-          (lang === "hi" ? v.gender === "Male" : v.gender === "Female") &&
-          v.lang === `${lang}-IN`
-      );
+      const voice = voices.find((v) => {
+        if (lang === "en") {
+          return /AmberNeural/u.test(v.name);
+        }
+        if (lang === "hi") {
+          return /MadhurNeural/u.test(v.name);
+        }
+        return false;
+      });
       if (voice) {
         utterance.voice = voice;
-        utterance.rate = 1.35;
+        utterance.rate = 1.25;
+        utterance.pitch = 1.05;
         ponyfill.speechSynthesis.speak(utterance);
       }
     }
