@@ -13,7 +13,7 @@ import {
 const SettingsDrawer = ({ open, onClose, language, onLanguageChange }) => {
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ width: 250 }}>
+      <Grid container direction="column" sx={{ width: 250, height: "100%" }}>
         <Grid container sx={{ px: 2, py: 1, alignItems: "center" }}>
           <Typography variant="h6" component="div" sx={{ flex: 1 }}>
             Settings
@@ -23,7 +23,7 @@ const SettingsDrawer = ({ open, onClose, language, onLanguageChange }) => {
           </IconButton>
         </Grid>
         <Divider />
-        <Box sx={{ px: 2 }}>
+        <Box sx={{ px: 2, flex: 1 }}>
           <Typography variant="body1" component="p" sx={{ mt: 2, mb: 1 }}>
             Language
           </Typography>
@@ -37,7 +37,18 @@ const SettingsDrawer = ({ open, onClose, language, onLanguageChange }) => {
             <ToggleButton value="hi">Hindi</ToggleButton>
           </ToggleButtonGroup>
         </Box>
-      </Box>
+        <Divider />
+        <Box sx={{ px: 2 }}>
+          <Typography
+            variant="body1"
+            component="p"
+            align="center"
+            sx={{ my: 2 }}
+          >
+            Developed with ☕ by Team SIGABRT
+          </Typography>
+        </Box>
+      </Grid>
     </Drawer>
   );
 };
